@@ -3,7 +3,9 @@ package netty_1_8;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import netty_1_6.ChannelHandler;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
@@ -24,6 +26,15 @@ public class MyClientHandler extends ChannelInboundHandlerAdapter {
         ctx.writeAndFlush(str);
     }
 
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        //接收msg消息{与上一章节相比，此处已经不需要自己进行解码}
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + " 接收到消息：" + msg);
+        //收到消息后，群发给客户端
+        String str = "服务端收到：" + new Date() + " " + msg + "\r\n";
+        ChannelHandler.channelGroup.writeAndFlush(str);
+    }
+
     /**
      * 当客户端主动断开服务端的链接后，这个通道就是不活跃的。也就是说客户端与服务端的关闭了通信通道并且不可以传输数据
      */
@@ -38,6 +49,7 @@ public class MyClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.close();
+
         System.out.println("异常信息：\r\n" + cause.getMessage());
     }
 
